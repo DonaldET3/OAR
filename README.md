@@ -1,5 +1,4 @@
-# OAR
-Opal File Archiver <br />
+# Opal File Archiver (OAR)
 for Unix <br />
 version 1
 
