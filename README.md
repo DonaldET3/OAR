@@ -1,6 +1,5 @@
 # Opal File Archiver (OAR)
-for Unix <br />
-version 1
+for Unix, version 1
 
 This progam archives files, recreates files from an archive, and lists files in an archive.
 
@@ -17,9 +16,9 @@ k: do not overwrite existing files <br />
 u: only copy a file if it is newer than the existing one <br />
 v: verbose
 
-list mode options: vf <br />
-read mode options: kuvf <br />
-write mode options: vaf
+list mode options: v, f <br />
+read mode options: k, u, v, f <br />
+write mode options: v, a, f
 
 After the list of options, there is the list of files to process. If the file is a directory, all files in that directory are processed.
 
@@ -39,7 +38,7 @@ file header: <br />
 magic string <br />
 version word
 
-file entry:
+file entry: <br />
 file type byte <br />
 file path length word <br />
 file path data <br />
