@@ -9,15 +9,15 @@ If neither -r nor -w are mentioned, the program is in list mode; the program rea
 
 In write mode, if no files are specified in the command line, the program will read a list of paths, one per line, from standard input. If the program enters a directory that is an ancestor of itself, the progam will quit.
 
-options <br />
-a: append files to archive <br />
-f: specify path to archive <br />
-k: do not overwrite existing files <br />
-u: only copy a file if it is newer than the existing one <br />
+### options  
+a: append files to archive  
+f: specify path to archive  
+k: do not overwrite existing files  
+u: only copy a file if it is newer than the existing one  
 v: verbose
 
-list mode options: v, f <br />
-read mode options: k, u, v, f <br />
+list mode options: v, f  
+read mode options: k, u, v, f  
 write mode options: v, a, f
 
 After the list of options, there is the list of files to process. If the file is a directory, all files in that directory are processed.
@@ -30,20 +30,20 @@ In verbose read and write modes, the pathname is output to standard error.
 
 The operator is warned about filenames with newlines in them when the names are listed.
 
-<br />
- 
-FILE FORMAT
+_______
 
-file header: <br />
-magic string <br />
+## FILE FORMAT
+
+### file header  
+magic string  
 version word
 
-file entry: <br />
-file type byte <br />
-file path length word <br />
-file path data <br />
-modification time exists boolean <br />
-modification time: year word, month byte, day byte, hour byte, minute byte, second byte <br />
-if regular file, file byte length word <br />
-file data <br />
+### file entry  
+file type byte  
+file path length word  
+file path data  
+modification time exists boolean  
+modification time: year word, month byte, day byte, hour byte, minute byte, second byte  
+if regular file, file byte length word  
+file data  
 more data boolean
