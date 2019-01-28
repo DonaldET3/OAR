@@ -1,6 +1,8 @@
 # Opal File Archiver (OAR)
 for Unix, version 1
 
+You should review the source code of this program before using it with important files or a system that contains important files. You take all responsibility for what happens when you use this program.
+
 This progam archives files, recreates files from an archive, and lists files in an archive.
 
 If the -h option is mentioned, the program simply writes the version and help to standard error and exits.
