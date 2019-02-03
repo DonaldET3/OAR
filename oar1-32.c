@@ -883,7 +883,7 @@ void oa_write(struct options *opts)
 /* list archive members */
 void oa_list(struct options *opts)
 {
- size_t i;
+ int i;
  struct file_md fmd;
  FILE *archf;
 
@@ -925,7 +925,7 @@ void oa_list(struct options *opts)
 /* read archive */
 void oa_read(struct options *opts)
 {
- size_t i;
+ int i;
  struct file_md fmd;
  FILE *archf;
 
