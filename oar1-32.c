@@ -31,6 +31,7 @@
 #include <string.h>
 /* strlen()
  * strcpy()
+ * strstr()
  */
 
 #include <stdbool.h>
@@ -83,46 +84,68 @@
 /* "OAR1-32" */
 uint8_t magic[] = {0x4F, 0x41, 0x52, 0x31, 0x2D, 0x33, 0x32, 0x00};
 
+/* program options */
 struct options {
+ /* archive name */
  char *aname;
+ /* append to an existing archive */
  bool append;
+ /* overwrite existing filesin the filesystem */
  bool overwrite;
+ /* only overwrite older files */
  bool update;
+ /* verbose mode */
  bool verbose;
+ /* filename vector */
  char **fnames;
- size_t ind;
+ /* starting index for filenames */
+ int ind;
 };
 
+/* directory descriptor */
 struct dir_des {
+ /* directory path */
  char *path;
+ /* inode list length */
  size_t inl_len;
+ /* inode list */
  ino_t *inl;
+ /* next directory descriptor */
  struct dir_des *next;
 };
 
+/* file metadata */
 struct file_md {
+ /* file type */
  uint8_t type;
+ /* file path */
  char *path;
+ /* does time information exist for the file? */
  bool te;
+ /* time structure */
  struct tm t;
+ /* file data length */
  uint32_t length;
 };
 
 
 /* functions section */
 
+/* error from library */
 void error(char *message)
 {
  perror(message);
  exit(EXIT_FAILURE);
 }
 
+/* internal failure */
 void fail(char *message)
 {
  fprintf(stderr, "%s\n", message);
  exit(EXIT_FAILURE);
 }
 
+/* help message */
 void help()
 {
  char message[] = "Opal file archiver\nfor Unix\nversion 1\n32-bit\n\n"
@@ -140,6 +163,7 @@ void help()
  fputs(message, stderr);
 }
 
+/* bad option from command line */
 void bad_opt(int mode, char c)
 {
  if(mode == 0)
@@ -154,6 +178,7 @@ void bad_opt(int mode, char c)
  exit(EXIT_FAILURE);
 }
 
+/* write big-endian 32-bit word */
 void write_word(uint32_t x, FILE *fp)
 {
  int i;
@@ -165,6 +190,7 @@ void write_word(uint32_t x, FILE *fp)
  return;
 }
 
+/* read big-endian 32-bit word */
 uint32_t read_word(FILE *fp)
 {
  int i, c;
@@ -180,6 +206,7 @@ uint32_t read_word(FILE *fp)
  return x;
 }
 
+/* write opal archive header */
 void oa_w_header(FILE *archf)
 {
  /* write magic string */
@@ -192,6 +219,7 @@ void oa_w_header(FILE *archf)
  return;
 }
 
+/* read opal archive header */
 void oa_r_header(FILE *archf)
 {
  int i, c;
@@ -212,6 +240,7 @@ void oa_r_header(FILE *archf)
  return;
 }
 
+/* write opal archive time */
 void oa_w_time(time_t t, FILE *archf)
 {
  struct tm *tms;
@@ -228,6 +257,7 @@ void oa_w_time(time_t t, FILE *archf)
  return;
 }
 
+/* read opal archive time */
 void oa_r_time(struct tm *t, FILE *archf)
 {
  int c;
@@ -248,6 +278,7 @@ void oa_r_time(struct tm *t, FILE *archf)
  return;
 }
 
+/* write an opal archive regular file record */
 void oa_w_rf(char *fname, struct stat *fsmd, FILE *archf)
 {
  int i, c;
@@ -323,6 +354,7 @@ void oa_w_rf(char *fname, struct stat *fsmd, FILE *archf)
  }
 }
 
+/* write an opal archive directory record */
 void oa_w_dir(char *fname, struct stat *fsmd, FILE *archf)
 {
  int i;
@@ -472,6 +504,7 @@ void oa_proc_dir(char *fname, struct stat *rdir_md, FILE *archf, bool verbose)
  return;
 }
 
+/* get filenames from standard input */
 void get_fnames(struct options *opts)
 {
  int c = '\0';
@@ -517,6 +550,7 @@ void get_fnames(struct options *opts)
  return;
 }
 
+/* read file metadata from opal archive */
 bool oa_r_fmd(struct file_md *fmd, FILE *archf)
 {
  int c, i;
@@ -552,6 +586,7 @@ bool oa_r_fmd(struct file_md *fmd, FILE *archf)
  return true;
 }
 
+/* find the length of the file data in a regular file record */
 void oa_data_length(struct file_md *fmd, FILE *archf)
 {
  int c;
@@ -579,6 +614,7 @@ void oa_data_length(struct file_md *fmd, FILE *archf)
  }
 }
 
+/* find whether path matches the argument in list mode */
 bool list_match(char *arg, char *path)
 {
  int i;
@@ -615,6 +651,7 @@ bool list_match(char *arg, char *path)
  return true;
 }
 
+/* write file listing */
 void w_listing(struct file_md *fmd, bool verbose)
 {
  char dates[128];
@@ -653,6 +690,7 @@ void w_listing(struct file_md *fmd, bool verbose)
  return;
 }
 
+/* find whether the path matches the argument in read mode */
 bool read_match(char *arg, char *path)
 {
  int i;
@@ -681,6 +719,7 @@ bool read_match(char *arg, char *path)
  return true;
 }
 
+/* find whether an existing file meets criteria for replacement */
 bool criteria(struct file_md *fmd, struct options *opts)
 {
  struct stat fsmd;
@@ -701,6 +740,7 @@ bool criteria(struct file_md *fmd, struct options *opts)
  return true;
 }
 
+/* read a directory record from an opal archive */
 void oa_r_dir(struct file_md *fmd)
 {
  struct stat fsmd;
@@ -731,6 +771,7 @@ void oa_r_dir(struct file_md *fmd)
  return;
 }
 
+/* read a regular file record from an opal archive */
 void oa_r_rf(struct file_md *fmd, FILE *archf)
 {
  int i, c;
