@@ -10,7 +10,7 @@ If neither -r nor -w are mentioned, the program is in list mode; the program rea
 
 In write mode, the program reads a list of paths, one per line, from standard input.
 
-## options
+### options
 h: print help and exit  
 w: write mode  
 r: read mode  
