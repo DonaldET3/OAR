@@ -2,7 +2,7 @@
 for Unix  
 version 2  
 
-You should review the source code of this program before using it with important files or a system that contains important files. You take all responsibility for what happens when you use this program. If you do decide to use this program, save a copy of the source code; the code in this repository may be replaced by an entirely incompatible program at any time.
+**You should review the source code of this program before using it with important files or a system that contains important files. You take all responsibility for what happens when you use this program. If you do decide to use this program, save a copy of the source code; the code in this repository may be replaced by an entirely incompatible program at any time.**
 
 This progam archives files, recreates files from an archive, and lists files in an archive.
 
