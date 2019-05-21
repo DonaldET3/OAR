@@ -111,6 +111,8 @@ struct file_md {
  char type;
  /* file path */
  char *path;
+ /* path space size */
+ size_t space;
  /* does time information exist for the file? */
  int te;
  /* time structure */
@@ -266,15 +268,13 @@ void oa_r_time(struct tm *t)
 bool oa_r_fmd(struct file_md *fmd)
 {
  int c;
- size_t size;
 
  /* read file record type */
  if((c = getchar()) == EOF) return false;
  fmd->type = c;
 
  /* read path */
- size = strlen(fmd->path) + 1;
- if(getdelim(&fmd->path, &size, '\0', stdin) == -1) failed("read path");
+ if(getdelim(&fmd->path, &fmd->space, '\0', stdin) == -1) failed("read path");
 
  /* read time boolean */
  if((c = getchar()) == EOF) failed("read time boolean");
@@ -542,8 +542,8 @@ void oa_list(struct options *opts)
  struct file_md fmd;
 
  /* initialize dynamic string space */
- fmd.path = malloc(1);
- fmd.path[0] = '\0';
+ fmd.path = NULL;
+ fmd.space = 0;
 
  /* a path must be specified */
  if(opts->subset == NULL) fail("no path specified");
@@ -573,8 +573,8 @@ void oa_read(struct options *opts)
  struct file_md fmd;
 
  /* initialize dynamic string space */
- fmd.path = malloc(1);
- fmd.path[0] = '\0';
+ fmd.path = NULL;
+ fmd.space = 0;
 
  /* read archive file header */
  oa_r_header();
