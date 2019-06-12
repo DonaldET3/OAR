@@ -375,6 +375,9 @@ void oa_w_rf(char *f_name, struct stat *fsmd)
   if(putchar(c) == EOF) failed("write file data");
  }
 
+ /* close file */
+ fclose(data_f);
+
  return;
 }
 
