@@ -1,6 +1,6 @@
 /* Opal file archiver
  * for Unix
- * version 2
+ * version 2.1
  */
 
 
@@ -11,7 +11,10 @@
  */
 
 #include <stdio.h>
-/* getchar()
+/* FILE
+ * NULL
+ * EOF
+ * getchar()
  * putchar()
  * getc()
  * putc()
@@ -23,16 +26,13 @@
  * fopen()
  * fclose()
  * perror()
- * FILE
- * NULL
- * EOF
  */
 
 #include <stdlib.h>
-/* exit()
- * NULL
+/* NULL
  * EXIT_FAILURE
  * EXIT_SUCCESS
+ * exit()
  */
 
 #include <string.h>
@@ -54,11 +54,11 @@
  */
 
 #include <dirent.h>
-/* opendir()
+/* DIR
+ * struct dirent
+ * opendir()
  * readdir()
  * closedir()
- * DIR
- * struct dirent
  */
 
 #include <locale.h>
@@ -70,21 +70,21 @@
  */
 
 #include <time.h>
-/* strftime()
+/* struct tm
+ * struct timespec
+ * strftime()
  * localtime()
  * mktime()
- * struct tm
- * struct timespec
  */
 
 #include <sys/stat.h>
-/* stat()
+/* struct stat
+ * UTIME_OMIT
+ * stat()
  * mkdir()
  * utimensat()
  * S_ISREG()
  * S_ISDIR()
- * struct stat
- * UTIME_OMIT
  */
 
 #include <fcntl.h>
@@ -101,6 +101,10 @@ uint8_t magic[] = {0x4F, 0x41, 0x52, 0x32, 0x00};
 struct options {
  /* subset path */
  char *subset;
+ /* keep existing files */
+ bool keep;
+ /* update mode */
+ bool update;
  /* verbose mode */
  bool verbose;
 };
@@ -152,12 +156,14 @@ void failed(char *message)
 void help()
 {
  char message[] = "Opal file archiver\n"
- "version 2\n\n"
+ "version 2.1\n\n"
  "options\n"
  "h: print help and exit\n"
  "w: write mode, writes an archive\n"
  "r: read mode, reads an archive\n"
  "p: specify a subset path of archive\n"
+ "k: do not overwrite existing files\n"
+ "u: only restore a file if it is newer than the existing one\n"
  "v: verbose mode\n\n"
  "If neither -w nor -r are specified, the program is in list mode.\n"
  "The mode option must be specified first.\n\n";
@@ -484,21 +490,34 @@ bool list_match(char *arg, char *path)
  return true;
 }
 
-/* find whether the path matches the argument in read mode */
-bool read_match(char *arg, char *path)
+/* find whether the path meets the read mode criteria */
+bool read_match(struct options *opts, struct file_md *fmd)
 {
- /* NULL arg matches any file */
- if(arg == NULL) return true;
+ struct stat fsmd;
+
+ /* check file existence */
+ if(stat(fmd->path, &fsmd) == 0)
+ {
+  if(opts->keep) return false;
+
+  /* compare file age */
+  if(opts->update && fmd->te)
+   if(mktime(&fmd->t) <= fsmd.st_mtime)
+    return false;
+ }
+
+ /* NULL matches any file */
+ if(opts->subset == NULL) return true;
  /* a single dot matches any file */
- if(!strcmp(arg, ".")) return true;
+ if(!strcmp(opts->subset, ".")) return true;
 
- /* arg matches itself */
- if(!strcmp(arg, path)) return true;
+ /* subset matches itself */
+ if(!strcmp(opts->subset, fmd->path)) return true;
 
- /* if path is a parent of arg, it is a match */
- if(is_parent(path, arg) != NULL) return true;
- /* if arg is a parent of path, it is a match */
- return is_parent(arg, path) != NULL;
+ /* if path is a parent of subset, it is a match */
+ if(is_parent(fmd->path, opts->subset) != NULL) return true;
+ /* if subset is a parent of path, it is a match */
+ return is_parent(opts->subset, fmd->path) != NULL;
 }
 
 /* write archive */
@@ -585,8 +604,8 @@ void oa_read(struct options *opts)
  /* for each file in the archive... */
  while(oa_r_fmd(&fmd))
  {
-  /* compare the path */
-  if(read_match(opts->subset, fmd.path))
+  /* compare against criteria */
+  if(read_match(opts, &fmd))
   {
    /* verbose mode */
    if(opts->verbose) fprintf(stderr, "%s\n", fmd.path);
@@ -620,6 +639,8 @@ int main(int argc, char **argv)
 
  /* initialize options structure */
  opts.subset = NULL;
+ opts.keep = false;
+ opts.update = false;
  opts.verbose = false;
 
  /* initialize global variables */
@@ -630,13 +651,15 @@ int main(int argc, char **argv)
  errno = 0;
 
  /* parse command line */
- while((c = getopt(argc, argv, "hwrp:v")) != -1)
+ while((c = getopt(argc, argv, "hwrp:kuv")) != -1)
   switch(c)
   {
    case 'h': help(); exit(EXIT_SUCCESS);
    case 'w': if(mode > -1) mode = 1; else bad_opt(mode, c); break;
    case 'r': if(mode < 1) mode = -1; else bad_opt(mode, c); break;
    case 'p': opts.subset = optarg; break;
+   case 'k': if(mode < 0) opts.keep = true; else bad_opt(mode, c); break;
+   case 'u': if(mode < 0) opts.update = true; else bad_opt(mode, c); break;
    case 'v': opts.verbose = true; break;
    case '?': exit(EXIT_FAILURE);
   }
