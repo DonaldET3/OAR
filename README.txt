@@ -5,6 +5,11 @@ version 2.1
 This progam archives files, recreates files from an archive, and lists files in
 an archive.
 
+What happens when you use this software is your responsibility. Be careful when
+using this software on a system that contains important files. If you do decide
+to use this software, save a copy of the source code; the code in this
+repository may be replaced by entirely incompatible software at any time.
+
 If neither -r nor -w are mentioned, the program is in list mode; the program
 reads an archive file from standard input and writes the list of file paths to
 standard output. If -r is specified, the program is in read mode; the program
